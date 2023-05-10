@@ -1,25 +1,13 @@
 
 # faersquarterlydata
 
-<!-- badges: start -->
-<!-- badges: end -->
 
-The goal of faersquarterlydata is to ...
+The goal of faersquarterlydata is to provide an easy framework to read FAERS XML/ASCII files
 
 ## Installation
 
-You can install the development version of faersquarterlydata like so:
+You can install the faersquarterlydata package like so:
 
 ``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+install.packages(faersquarterlydata)
 ```
-
-## Example
-
-This is a basic example which shows you how to solve a common problem:
-
-``` r
-library(faersquarterlydata)
-## basic example code
-```
-

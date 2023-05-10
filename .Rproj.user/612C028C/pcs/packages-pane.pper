@@ -1,7 +1,7 @@
 {
     "installOptions": {
         "installFromRepository": true,
-        "libraryPath": "C:/Users/luis.ferreira/Documents/R/win-library/3.5",
+        "libraryPath": "C:/Users/luis.ferreira/AppData/Local/Programs/R/R-4.2.2/library",
         "installDependencies": true
     }
 }
