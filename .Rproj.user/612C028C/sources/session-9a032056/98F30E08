@@ -1,0 +1,26 @@
+{
+    "id": "98F30E08",
+    "path": "C:/Users/luis.ferreira/Desktop/faersquarterlydata/tests/testthat/test-read_func_xml.R",
+    "project_path": "tests/testthat/test-read_func_xml.R",
+    "type": "r_source",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1683650360841.0,
+    "source_on_save": false,
+    "relative_order": 6,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "9,47",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1683717771,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1683717771494,
+    "read_only": false,
+    "read_only_alternatives": []
+}

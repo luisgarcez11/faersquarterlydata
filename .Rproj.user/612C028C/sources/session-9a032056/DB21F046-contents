@@ -1,0 +1,32 @@
+
+# libraries ---------------------------------------------------------------
+
+library(dplyr)
+library(xml2)
+library(tidyr)
+
+
+# 00_load -----------------------------------------------------------------
+
+
+  files_als_last <- retrive_from_xml_files(xml_address_vector = list.files("data-raw/faers_data_unzipped/xml/",pattern = ".xml", full.names = TRUE ) %>% 
+                                             sort(decreasing = TRUE), 
+                                           drug_indication_pattern = "Amyotrophic lateral sclerosis|amyotrophic lateral sclerosis|Motor neuron disease" ,
+                                           cache_path = "data-raw/cache/cache.Rdata")
+
+
+ a <-  retrieve_faers_ascii(ascii_dir = "data-raw/faers_data_unzipped/ascii/", cache_path = "data-raw/cache/cache_ascii_all_v3.rdata", 
+                            drug_indication_pattern = "Amyotrophic lateral sclerosis|amyotrophic lateral sclerosis|Motor neuron disease")
+
+
+b <- unify_tabular_ascii(a)
+
+summ <- faers_data_summary(tabular_faers_data = b)
+
+summ <- estimate_ror_bygroup(tabular_faers_data = b %>% filter(sex %in% c("M", "F")), 
+                             group_of_interest_col = "sex",group_of_interest_ref = "M", event_of_interest_col = "pt")
+
+
+faers_ascii_data <- retrieve_faers_ascii(ascii_dir = "tests/resources/test_zip_ex_dir/ASCII")
+faers_ascii_data_unified <- unify_tabular_ascii(ascii_list = faers_ascii_data)
+usethis::use_data(faers_ascii_data_unified)
