@@ -3,7 +3,7 @@
     "path": "C:/Users/luis.ferreira/Desktop/faersquarterlydata/tests/testthat.R",
     "project_path": "tests/testthat.R",
     "type": "r_source",
-    "hash": "3967379626",
+    "hash": "0",
     "contents": "",
     "dirty": false,
     "created": 1683718765920.0,
@@ -11,7 +11,9 @@
     "relative_order": 17,
     "properties": {
         "source_window_id": "",
-        "Source": "Source"
+        "Source": "Source",
+        "cursorPosition": "11,32",
+        "scrollLine": "0"
     },
     "folds": "",
     "lastKnownWriteTime": 1680458350,

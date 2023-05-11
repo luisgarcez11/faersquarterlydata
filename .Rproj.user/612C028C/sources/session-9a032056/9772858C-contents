@@ -34,6 +34,106 @@ estimate_ror <- function(n11, n10, n01, n00, ic_range = 0.95){
 }
 
 
+#' Estimate Proportional Reporting Odds Ratio
+#'
+#' @param n11 Number of events of interest within the group of interest
+#' @param n10 Number of events of interest from all groups
+#' @param n01 Number of all events within the group of interest
+#' @param n00 Number of all events from all groups
+#' @param n00 Number of all events from all groups
+#' @param ic_range Confidence Interval range
+#'
+#' @return Proportional Reporting Odds Ratio
+#' @export
+#' @import dplyr
+#'
+#' @examples
+#' estimate_prr(n11 = 20, n10 = 10, n01 = 200, n00 = 200)
+estimate_prr <- function(n11, n10, n01, n00){
+  
+  n11 <- as.numeric(n11)
+  n10 <- as.numeric(n10)
+  n01 <- as.numeric(n01)
+  n00 <- as.numeric(n00)
+  
+  prr <- (n11/(n11 + n01)) / (n10/ (n10 + n00))
+  
+  return(prr)
+  
+}
+
+
+
+#' Estimate Chi-Squared test with yates correction
+#'
+#' @param n11 Number of events of interest within the group of interest
+#' @param n10 Number of events of interest from all groups
+#' @param n01 Number of all events within the group of interest
+#' @param n00 Number of all events from all groups
+#' @param n00 Number of all events from all groups
+#' @param ic_range Confidence Interval range
+#'
+#' @return list with Chi-squared statistic and p-value
+#' @export
+#' @import dplyr
+#'
+#' @examples
+#' estimate_chisq(n11 = 20, n10 = 10, n01 = 200, n00 = 200)
+estimate_chisq <- function(n11, n10, n01, n00){
+  
+  n11 <- as.numeric(n11)
+  n10 <- as.numeric(n10)
+  n01 <- as.numeric(n01)
+  n00 <- as.numeric(n00)
+  
+  chisq <- list()
+  
+  mx <- matrix(data = c(n11, n10, n01, n00), ncol = 2, byrow = TRUE)
+  
+  ch <- chisq.test(mx, correct = TRUE) %>% suppressWarnings()
+  
+  chisq$estimate <- unname(ch$statistic)
+  chisq$p_value <- ch$p.value
+  
+  return(chisq)
+  
+}
+
+#' Estimate Information Component
+#'
+#' @param n11 Number of events of interest within the group of interest
+#' @param n10 Number of events of interest from all groups
+#' @param n01 Number of all events within the group of interest
+#' @param n00 Number of all events from all groups
+#' @param n00 Number of all events from all groups
+#' @param ic_range Confidence Interval range
+#'
+#' @return List with Information Component estimate and its 0.95 IC
+#' @export
+#' @import dplyr
+#'
+#' @examples
+#' estimate_ic(n11 = 20, n10 = 10, n01 = 200, n00 = 200)
+estimate_infoc <- function(n11, n10, n01, n00){
+  
+  n11 <- as.numeric(n11)
+  n10 <- as.numeric(n10)
+  n01 <- as.numeric(n01)
+  n00 <- as.numeric(n00)
+  
+  infoc <- list()
+  
+  n11_exp <- ((n11 + n10) * (n11 + n01)) / (n11 + n10 + n01 + n00)
+  
+  infoc$estimate <- log2((n11 + 0.5)/ (n11_exp + 0.5))
+  infoc$ic <- c(lower = infoc$estimate - 3.3 * (n11 + 0.5)^(-1/2) - 2 * (n11 +0.5)^(-3/2),
+                upper = infoc$estimate + 2.4 * (n11 + 0.5)^(-1/2) - 0.5 * (n11 +0.5)^(-3/2)) 
+  
+  return(infoc)
+  
+}
+
+
 #' Estimate Reporting Odds Ratio 
 #'
 #' @param tabular_faers_data FAERS tabular format. Output of function \link{retrieve_faersxml} or \link{retrieve_faersxml_all}
@@ -42,7 +142,7 @@ estimate_ror <- function(n11, n10, n01, n00, ic_range = 0.95){
 #' @param group_of_interest_ref a string, specifying the group of interest reference. Must me a value from the group of interest column.
 #' @param rename_vector optional. named vector to rename the group of interest, in order to show up in a 
 #' @param event_of_interest_col a string, specifying the event of interest. Must me a column name of `tabular_faers_data`.
-#' @param ... arguments passed to `estimate_ror`.
+#' @param ... arguments passed to `estimate_ror` like `ic_range`.
 #'
 #' @return tibble with the event of interest counts, group of interest counts and the respective estimated RORand Confidence Intervals.
 #' @export
@@ -84,8 +184,11 @@ estimate_ror_bygroup <- function(tabular_faers_data,
       {names(.)[5] <-  paste0("other_events_", names(.)[2]); .} %>% 
       {names(.)[6] <-  paste0("other_events_", names(.)[3]); .} %>% 
       mutate(ror = apply(., MARGIN = 1, FUN = function(x) { estimate_ror(n11 = x[2], n10 = x[3], n01 = x[5], n00 = x[6])})) %>% 
-      tidyr::unnest_wider("ror") %>% 
-      tidyr::unnest_wider("ic" , names_sep = "_") %>% 
+      mutate(prr = apply(., MARGIN = 1, FUN = function(x) { estimate_prr(n11 = x[2], n10 = x[3], n01 = x[5], n00 = x[6])})) %>% 
+      mutate(infoc = apply(., MARGIN = 1, FUN = function(x) { estimate_infoc(n11 = x[2], n10 = x[3], n01 = x[5], n00 = x[6])})) %>% 
+      mutate(chisq = apply(., MARGIN = 1, FUN = function(x) { estimate_chisq(n11 = x[2], n10 = x[3], n01 = x[5], n00 = x[6])})) %>% 
+      tidyr::unnest_wider(c("ror", "infoc", "chisq"), names_sep = "_") %>% 
+      tidyr::unnest_wider(ends_with("ic") , names_sep = "_") %>% 
       filter(.[,1] == TRUE) %>% 
       select(-1) %>% 
       return()
@@ -107,8 +210,11 @@ estimate_ror_bygroup <- function(tabular_faers_data,
       {names(.)[5] <-  paste0("other_events_", names(.)[2]); .} %>% 
       {names(.)[6] <-  paste0("other_events_", names(.)[3]); .} %>% 
       mutate(ror = apply(., MARGIN = 1, FUN = function(x) { estimate_ror(n11 = x[2], n10 = x[3], n01 = x[5], n00 = x[6])})) %>% 
-      tidyr::unnest_wider("ror") %>% 
-      tidyr::unnest_wider("ic" , names_sep = "_") %>% 
+      mutate(prr = apply(., MARGIN = 1, FUN = function(x) { estimate_prr(n11 = x[2], n10 = x[3], n01 = x[5], n00 = x[6])})) %>% 
+      mutate(infoc = apply(., MARGIN = 1, FUN = function(x) { estimate_infoc(n11 = x[2], n10 = x[3], n01 = x[5], n00 = x[6])})) %>% 
+      mutate(chisq = apply(., MARGIN = 1, FUN = function(x) { estimate_chisq(n11 = x[2], n10 = x[3], n01 = x[5], n00 = x[6])})) %>% 
+      tidyr::unnest_wider(c("ror", "infoc", "chisq"), names_sep = "_") %>% 
+      tidyr::unnest_wider(ends_with("ic") , names_sep = "_") %>% 
       arrange(desc("total_events")) %>% 
       return()
     

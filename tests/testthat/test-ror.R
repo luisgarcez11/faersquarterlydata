@@ -5,6 +5,18 @@ test_that("estimate_ror", {
   testthat::expect_true(is.list(estimate_ror(n11 = 20, n10 = 10, n01 = 200, n00 = 50)))
 })
 
+test_that("estimate_ppr", {
+  testthat::expect_no_error(estimate_prr(n11 = 20, n10 = 10, n01 = 200, n00 = 200))
+})
+
+test_that("estimate_chisq", {
+  testthat::expect_no_error(estimate_chisq(n11 = 20, n10 = 10, n01 = 200, n00 = 200))
+})
+
+test_that("estimate_ic", {
+  testthat::expect_no_error(estimate_ic(n11 = 20, n10 = 10, n01 = 200, n00 = 200))
+})
+
 test_that("estimate_ror_bygroup", {
   
   faers_ascii_data <- retrieve_faersascii(ascii_dir = "resources/test_zip_ex_dir/ASCII")
