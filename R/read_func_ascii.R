@@ -1,3 +1,36 @@
+
+
+
+#' Get duplicated caseIDs
+#' 
+#' Retrieve the duplicated caseIDs to remove from the analysis.
+#'
+#' @param duplicates_dir directory path where the text files with the duplicates information are.
+#'
+#' @return an integer vector with all the caseids to be removed
+#' @export
+get_duplicate_caseids <- function(duplicates_dir = NULL){
+  
+  if (is.null(duplicates_dir)){return("No duplicates")}
+  
+  if (!dir.exists(duplicates_dir)) {
+    stop("directory does not exist")
+  }
+  
+  deleted_files <- list.files(duplicates_dir, full.names = TRUE, pattern = ".txt")
+  caseid_to_be_removed <- c()
+  
+  for (d_file in deleted_files){
+    read_file <- data.table::fread(d_file, sep = "$", quote = "", fill = FALSE)
+    caseid_to_be_removed <- c(caseid_to_be_removed, unique(read_file$V1))
+    
+  }
+  
+  return(caseid_to_be_removed)
+  
+}
+
+
 #' Convert a date string into a date format
 #'
 #' @param date_string A string vector with multiple formats (8, 6 or 4 digits)
@@ -27,23 +60,30 @@ arrange_date <- function(date_string) {
 }
 
 #' Read FAERS ascii files
+#' 
+#' Read ASCII files from a directory, removing the duplicates.
 #'
 #' @param ascii_dir directory path where ascii files are
 #' @param cache_path (optional) a string. Must have a ".Rdata" extension to save the read tabular formats in each loop.
-#' @param drug_indication_pattern (optional) a string. 
-#' @param drug_pattern (optional) a string. 
+#' @param drug_indication_pattern (optional) a string.filter ADRs with a specific drug indication pattern (**stringr** sintax) 
+#' @param drug_pattern (optional) a string. filter ADRs with a specific drug name pattern (**stringr** sintax) 
 #' @param primary_suspect (optional) a string. 
+#' @param ... directory with duplicate information to be passed to \link{get_duplicate_caseids}
 #'
 #' @return A list with binded tibbles retrieved from files.
 #' @export
 retrieve_faersascii <- function(ascii_dir, cache_path = NULL, drug_indication_pattern = NULL, drug_pattern = NULL,
-                                 primary_suspect = TRUE) {
+                                 primary_suspect = TRUE, ...) {
   if (!dir.exists(ascii_dir)) {
     stop("directory does not exist")
   }
 
   ascii_files <- list.files(ascii_dir, full.names = TRUE, pattern = ".txt")
   ascii_drug_files <- ascii_files[which(stringr::str_detect(ascii_files, pattern = "drug|DRUG|indi|INDI"))]
+  
+  
+  #getduplicated caseIDs
+  duplicated_caseids <- get_duplicate_caseids(...)
 
   # gather drug files
   drug_info <- tibble::tibble()
@@ -59,7 +99,8 @@ retrieve_faersascii <- function(ascii_dir, cache_path = NULL, drug_indication_pa
 
 
     if (stringr::str_detect(ascii_drug_file, "drug|DRUG")) {
-      read_file <- data.table::fread(ascii_drug_file, sep = "$", quote = "", fill = FALSE) %>%
+      read_file <- data.table::fread(ascii_drug_file, sep = "$", quote = "", fill = FALSE) %>% 
+        filter(!caseid %in% duplicated_caseids) %>% 
         {
           if ("nda_num" %in% names(.)) {
             .$nda_num <- as.double(.$nda_num)
@@ -76,9 +117,9 @@ retrieve_faersascii <- function(ascii_dir, cache_path = NULL, drug_indication_pa
             .
           }
         } %>%
-        mutate_at(vars(ends_with("_dt")), list(~ arrange_date(.)))
+        mutate_at(vars(ends_with("_dt")), list(~ arrange_date(.))) 
 
-      drug_info <- bind_rows(drug_info, read_file %>%
+      drug_info <- bind_rows(drug_info, read_file  %>% 
         {
           if (primary_suspect) {
             filter(., role_cod == "PS")
@@ -92,14 +133,15 @@ retrieve_faersascii <- function(ascii_dir, cache_path = NULL, drug_indication_pa
           } else {
             .
           }
-        })
+        }) 
     }
 
     if (stringr::str_detect(ascii_drug_file, "indi|INDI")) {
-      read_file <- data.table::fread(ascii_drug_file, sep = "$", quote = "", fill = FALSE) %>%
+      read_file <- data.table::fread(ascii_drug_file, sep = "$", quote = "", fill = FALSE) %>% 
+        filter(!caseid %in% duplicated_caseids) %>%
         mutate_at(vars(ends_with("_dt")), list(~ arrange_date(.)))
 
-      indi_info <- bind_rows(indi_info, read_file %>%
+      indi_info <- bind_rows(indi_info, read_file  %>%
         {
           if (!is.null(drug_indication_pattern)) {
             filter(., stringr::str_detect(string = indi_pt, pattern = drug_indication_pattern))
@@ -110,6 +152,7 @@ retrieve_faersascii <- function(ascii_dir, cache_path = NULL, drug_indication_pa
     }
   }
 
+  #set final structure for drug_indi_info 
   if (!is.null(drug_indication_pattern) & !is.null(drug_pattern)) {
     drug_indi_info <- drug_info %>%
       inner_join(indi_info %>% group_by(primaryid, caseid, indi_drug_seq) %>%
@@ -130,7 +173,8 @@ retrieve_faersascii <- function(ascii_dir, cache_path = NULL, drug_indication_pa
 
 
   if (is.null(drug_indication_pattern) & !is.null(drug_pattern)) {
-    drug_indi_info <- drug_info
+    drug_indi_info <- drug_info %>% 
+      filter(!caseid %in% duplicated_caseids)
   }
 
   if (is.null(drug_indication_pattern) & is.null(drug_pattern)) {
@@ -142,7 +186,10 @@ retrieve_faersascii <- function(ascii_dir, cache_path = NULL, drug_indication_pa
 
 
 
-  drug_info <- drug_info %>% filter(primaryid %in% drug_indi_info$primaryid)
+  #filter drug_info & indi_info
+  drug_info <- drug_info %>% filter(primaryid %in% drug_indi_info$primaryid) %>% 
+    mutate_at("drugname", ~stringr::str_replace_all(., pattern = "AND", replacement = "\\\\")) %>% 
+    mutate_at("drugname", ~stringr::str_squish(.))
   indi_info <- indi_info %>% filter(primaryid %in% drug_indi_info$primaryid)
 
 
@@ -164,7 +211,8 @@ retrieve_faersascii <- function(ascii_dir, cache_path = NULL, drug_indication_pa
 
 
     if (stringr::str_detect(ascii_file, "demo|DEMO")) {
-      demo_info <- demo_info %>% bind_rows(data.table::fread(ascii_file, sep = "$", quote = "", fill = FALSE) %>%
+      demo_info <- demo_info %>% bind_rows(data.table::fread(ascii_file, sep = "$", quote = "", fill = FALSE)%>% 
+                                             filter(!caseid %in% duplicated_caseids)  %>%
         mutate_at(vars(ends_with("_dt")), list(~ arrange_date(.))) %>%
         {
           if ("nda_num" %in% names(.)) {
@@ -178,7 +226,8 @@ retrieve_faersascii <- function(ascii_dir, cache_path = NULL, drug_indication_pa
         filter(primaryid %in% drug_indi_info$primaryid))
     }
     if (stringr::str_detect(ascii_file, "outc|OUTC")) {
-      outc_info <- outc_info %>% bind_rows(data.table::fread(ascii_file, sep = "$", quote = "", fill = FALSE) %>%
+      outc_info <- outc_info %>% bind_rows(data.table::fread(ascii_file, sep = "$", quote = "", fill = FALSE) %>% 
+                                             filter(!caseid %in% duplicated_caseids) %>%
         {
           if ("outc_cod" %in% names(.)) {
             dplyr::rename(., "outc_code" = "outc_cod")
@@ -190,17 +239,20 @@ retrieve_faersascii <- function(ascii_dir, cache_path = NULL, drug_indication_pa
         filter(primaryid %in% drug_indi_info$primaryid))
     }
     if (stringr::str_detect(ascii_file, "reac|REAC")) {
-      reac_info <- reac_info %>% bind_rows(data.table::fread(ascii_file, sep = "$", quote = "", fill = FALSE) %>%
+      reac_info <- reac_info %>% bind_rows(data.table::fread(ascii_file, sep = "$", quote = "", fill = FALSE) %>% 
+                                             filter(!caseid %in% duplicated_caseids) %>%
         mutate_at(vars(ends_with("_dt")), list(~ arrange_date(.))) %>%
         filter(primaryid %in% drug_indi_info$primaryid))
     }
     if (stringr::str_detect(ascii_file, "rpsr|RPSR")) {
-      rpsr_info <- rpsr_info %>% bind_rows(data.table::fread(ascii_file, sep = "$", quote = "", fill = FALSE) %>%
+      rpsr_info <- rpsr_info %>% bind_rows(data.table::fread(ascii_file, sep = "$", quote = "", fill = FALSE)%>% 
+                                             filter(!caseid %in% duplicated_caseids)  %>%
         mutate_at(vars(ends_with("_dt")), list(~ arrange_date(.))) %>%
-        filter(primaryid %in% drug_indi_info$primaryid))
+        filter(primaryid %in% drug_indi_info$primaryid)) 
     }
     if (stringr::str_detect(ascii_file, "ther|THER")) {
-      ther_info <- ther_info %>% bind_rows(data.table::fread(ascii_file, sep = "$", quote = "", fill = FALSE) %>%
+      ther_info <- ther_info %>% bind_rows(data.table::fread(ascii_file, sep = "$", quote = "", fill = FALSE)%>% 
+                                             filter(!caseid %in% duplicated_caseids)  %>%
         mutate_at(vars(ends_with("_dt")), list(~ arrange_date(.))) %>%
         {
           if ("dur" %in% names(.)) {
@@ -256,7 +308,10 @@ unify_tabular_ascii <- function(ascii_list) {
   drug_indi_info <- ascii_list$drug %>%
     left_join(ascii_list$indication %>% group_by(primaryid, caseid, indi_drug_seq) %>%
       summarise(indi_pt = paste(sort(unique(indi_pt)), collapse = "/")) %>%
-      ungroup(), by = c("primaryid", "caseid", "drug_seq" = "indi_drug_seq"))
+      ungroup(), by = c("primaryid", "caseid", "drug_seq" = "indi_drug_seq")) %>% 
+    left_join(ascii_list$therapy %>% 
+                distinct(primaryid, caseid, dsg_drug_seq, .keep_all = TRUE),
+              by = c("primaryid", "caseid", "drug_seq" = "dsg_drug_seq"))
 
   outcome_info <- ascii_list$outcome %>%
     group_by(primaryid, caseid) %>%
@@ -286,20 +341,28 @@ unify_tabular_ascii <- function(ascii_list) {
     left_join(drug_indi_info %>%
       group_by(primaryid, caseid) %>%
       summarise(
-        indi_pt_all = paste(sort(unique(indi_pt)), collapse = "/"),
-        drugname_all = paste(sort(unique(drugname)), collapse = "/")
+        indi_pt_all = paste(sort(unique(indi_pt)), collapse = " + "),
+        drugname_all = paste(sort(unique(drugname)), collapse = " + "),
       ) %>%
       ungroup(), by = c("primaryid", "caseid")) %>%
     left_join(drug_indi_info %>%
       filter(role_cod == "PS") %>%
       group_by(primaryid, caseid) %>%
       summarise(
-        indi_pt_ps = paste(sort(unique(indi_pt)), collapse = "/"),
-        drugname_ps = paste(sort(unique(drugname)), collapse = "/")
+        indi_pt_ps = sort(unique(indi_pt)),
+        drugname_ps = paste(sort(unique(drugname)), collapse = " + "),
+        start_dt_ps = unique(start_dt)
       ) %>%
-      ungroup(), by = c("primaryid", "caseid"))
+      ungroup(), by = c("primaryid", "caseid")) 
 
 
-
+  #de-duplication
+  unified_faers <- unified_faers %>% 
+    distinct(reporter_country, sex, event_dt, age, pt, indi_pt_all, drugname_all, start_dt_ps, .keep_all = TRUE)
+  message("unification and de-duplication applied.")
+  
   return(unified_faers)
 }
+
+
+

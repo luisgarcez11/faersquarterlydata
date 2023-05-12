@@ -43,7 +43,7 @@ summary_faersdata <- function(tabular_faers_data){
   #by safetyreportid
   tabular_faers_data_summary$safetyreporid <- 
     tabular_faers_data %>% 
-    mutate(age = case_when(age_cod == "YR" ~ as.numeric(age),
+    mutate(age_YR = case_when(age_cod == "YR" ~ as.numeric(age),
                            age_cod == "MON" ~ as.numeric(age)/30,
                            age_cod == "DY" ~ as.numeric(age)*365,
                            TRUE ~ as.numeric(age))) %>% 
@@ -51,14 +51,14 @@ summary_faersdata <- function(tabular_faers_data){
     summarize(i_f_code = unique(i_f_code),
               rept_cod = unique(rept_cod),
               mfr_sndr = unique(mfr_sndr),
-              age = as.numeric(unique(age)),
+              age_YR = as.numeric(unique(age_YR)),
               sex = unique(sex),
               e_sub = unique(e_sub),
               wt = as.numeric(unique(wt)),
               reporter_country = unique(reporter_country),
               occr_country = unique(occr_country),
               indi_pt_all = unique(indi_pt_all),
-              indi_pt_ps = unique(unique(indi_pt_ps)),
+              indi_pt_ps = unique(indi_pt_ps),
               drugname_all = unique(drugname_all),
               drugname_ps = unique(drugname_ps)) %>% 
     ungroup() %>% 
