@@ -306,6 +306,7 @@ retrieve_faersascii <- function(ascii_dir, cache_path = NULL, drug_indication_pa
 #' @export
 unify_tabular_ascii <- function(ascii_list) {
   drug_indi_info <- ascii_list$drug %>%
+    mutate_at("drugname", ~stringr::str_squish(.)) %>% 
     left_join(ascii_list$indication %>% group_by(primaryid, caseid, indi_drug_seq) %>%
       summarise(indi_pt = paste(sort(unique(indi_pt)), collapse = "/")) %>%
       ungroup(), by = c("primaryid", "caseid", "drug_seq" = "indi_drug_seq")) %>% 
