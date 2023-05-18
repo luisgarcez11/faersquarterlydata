@@ -13,8 +13,8 @@ test_that("estimate_chisq", {
   testthat::expect_no_error(estimate_chisq(n11 = 20, n10 = 10, n01 = 200, n00 = 200))
 })
 
-test_that("estimate_ic", {
-  testthat::expect_no_error(estimate_ic(n11 = 20, n10 = 10, n01 = 200, n00 = 200))
+test_that("estimate_infoc", {
+  testthat::expect_no_error(estimate_infoc(n11 = 20, n10 = 10, n01 = 200, n00 = 200))
 })
 
 test_that("estimate_ror_bygroup", {
@@ -40,6 +40,12 @@ test_that("estimate_ror_bygroup", {
                                     group_of_interest_col = "sex", 
                                     group_of_interest_ref = "M", 
                                     event_of_interest_col = "ei") %>% is.data.frame())
+  
+  testthat::expect_error(estimate_ror_bygroup(tabular_faers_data = faers_ascii_data_unified %>% 
+                                               mutate(ei = log_v)  ,
+                                             group_of_interest_col = "sex", 
+                                             group_of_interest_ref = "M", 
+                                             event_of_interest_col = "ei") %>% is.data.frame())
   
   testthat::expect_true(estimate_ror_bygroup(tabular_faers_data = faers_ascii_data_unified %>% 
                                                filter(sex %in% c("F", "M")) ,

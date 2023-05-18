@@ -54,7 +54,7 @@ summary_faersdata <- function(tabular_faers_data){
     group_by(drugname, role_cod) %>% 
     summarize( n = n(), .groups = "keep") %>% 
     ungroup() %>% 
-    pivot_wider(names_from = role_cod, values_from = n, names_prefix = "n_") %>% 
+    tidyr::pivot_wider(names_from = role_cod, values_from = n, names_prefix = "n_") %>% 
     arrange(desc(.[,2]))
   
   
@@ -73,7 +73,7 @@ summary_faersdata <- function(tabular_faers_data){
     group_by(indi_pt, role_cod) %>% 
     summarize( n = n(), .groups = "keep") %>% 
     ungroup() %>% 
-    pivot_wider(names_from = role_cod, values_from = n, names_prefix = "n_") %>% 
+    tidyr::pivot_wider(names_from = role_cod, values_from = n, names_prefix = "n_") %>% 
     arrange(desc(.[,2]))
   
   
@@ -92,7 +92,7 @@ summary_faersdata <- function(tabular_faers_data){
     group_by(indi_pt, role_cod) %>% 
     summarize( n = n(), .groups = "keep") %>% 
     ungroup() %>% 
-    pivot_wider(names_from = role_cod, values_from = n, names_prefix = "n_") %>% 
+    tidyr::pivot_wider(names_from = role_cod, values_from = n, names_prefix = "n_") %>% 
     arrange(desc(.[,2]))
   
   
@@ -111,7 +111,7 @@ summary_faersdata <- function(tabular_faers_data){
     group_by(prod_ai, role_cod) %>% 
     summarize( n = n(), .groups = "keep") %>% 
     ungroup() %>% 
-    pivot_wider(names_from = role_cod, values_from = n, names_prefix = "n_") %>% 
+    tidyr::pivot_wider(names_from = role_cod, values_from = n, names_prefix = "n_") %>% 
     arrange(desc(.[,2]))       
   
   

@@ -1,6 +1,6 @@
 testthat::test_that("get_duplicate_caseids", {
   testthat::expect_error(get_duplicate_caseids("hju"))
-  testthat::expect_error(get_duplicate_caseids(duplicates_dir = "resources/deleted"))
+  testthat::expect_true(is.vector(get_duplicate_caseids(duplicates_dir = "resources/deleted")))
   testthat::expect_equal(get_duplicate_caseids(), "No duplicates")
 })
 
@@ -16,11 +16,14 @@ testthat::test_that("arrange_date", {
 
 testthat::test_that("retrieve_faersascii", {
 
-  testthat::expect_error(object = retrieve_faersascii(object = "resources/nothing"))
+  testthat::expect_error(object = retrieve_faersascii(ascii_dir = "resources/nothing"))
   testthat::expect_true( object = is.list(retrieve_faersascii(ascii_dir = "resources/test_zip_ex_dir/ASCII", 
                                                                      cache_path = "resources/cache/cache_test.rdata")) )
   testthat::expect_true( object = is.list(retrieve_faersascii(ascii_dir = "resources/test_zip_ex_dir/ASCII", 
                                                                cache_path = "resources/cache/cache_test.rdata", drug_indication_pattern = "Parkinson")) )
+  testthat::expect_true( object = is.list(retrieve_faersascii(ascii_dir = "resources/test_zip_ex_dir/ASCII", 
+                                                              cache_path = "resources/cache/cache_test.rdata", drug_indication_pattern = "Parkinson", 
+                                                              primary_suspect = FALSE)) )
   testthat::expect_true( object = is.list(retrieve_faersascii(ascii_dir = "resources/test_zip_ex_dir/ASCII", 
                                                                cache_path = "resources/cache/cache_test.rdata", drug_pattern = "LEVODOPA")) )
   testthat::expect_true( object = is.list(retrieve_faersascii(ascii_dir = "resources/test_zip_ex_dir/ASCII", 

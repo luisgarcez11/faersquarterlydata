@@ -2,9 +2,13 @@
 
 export("%>%")
 export(arrange_date)
+export(estimate_chisq)
+export(estimate_infoc)
+export(estimate_prr)
 export(estimate_ror)
 export(estimate_ror_bygroup)
 export(faersxml_to_r)
+export(get_duplicate_caseids)
 export(retrieve_faersascii)
 export(retrieve_faersxml)
 export(retrieve_faersxml_all)

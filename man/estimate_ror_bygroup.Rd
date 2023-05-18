@@ -25,7 +25,7 @@ Must me a column name of `tabular_faers_data`, and this columns should only cont
 
 \item{event_of_interest_col}{a string, specifying the event of interest. Must me a column name of `tabular_faers_data`.}
 
-\item{...}{arguments passed to `estimate_ror`.}
+\item{...}{arguments passed to `estimate_ror` like `ic_range`.}
 }
 \value{
 tibble with the event of interest counts, group of interest counts and the respective estimated RORand Confidence Intervals.

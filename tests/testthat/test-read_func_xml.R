@@ -7,7 +7,9 @@ testthat::test_that("faersxml_to_r", {
 testthat::test_that("retrieve_faersxml", {
   testthat::expect_error(object = retrieve_faersxml(xml_address = "resources/1_ADR22Q1_example.xml", drug_wise = TRUE, reaction_wise = TRUE))
   testthat::expect_error(object = retrieve_faersxml(xml_address = "resources/1_ADR22Q1_example.xml", drug_wise = FALSE, reaction_wise = FALSE))
+  testthat::expect_true( object = is.data.frame(retrieve_faersxml(xml_address = "resources/1_ADR22Q1_example.xml", drug_indication_pattern = "Parkinson")) )
   testthat::expect_true( object = is.data.frame(retrieve_faersxml(xml_address = "resources/1_ADR22Q1_example.xml")) )
+  testthat::expect_true( object = is.data.frame(retrieve_faersxml(xml_address = "resources/1_ADR22Q1_example.xml", drug_wise = TRUE, reaction_wise = FALSE)) )
 })
 
 

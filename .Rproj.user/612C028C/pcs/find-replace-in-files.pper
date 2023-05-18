@@ -1,15 +1,15 @@
 {
     "dialog-state": {
-        "query": "retrieve_faersascii",
+        "query": "pivot_wider",
         "path": "",
         "regex": false,
         "caseSensitive": false,
         "wholeWord": false,
         "filePatterns": [],
-        "useGitGrep": false,
+        "useGitGrep": true,
         "excludeGitIgnore": true,
         "excludeFilePatterns": [],
-        "resultsCount": 17,
+        "resultsCount": 8,
         "errorCount": 0,
         "replaceErrors": "",
         "projectRelative": true

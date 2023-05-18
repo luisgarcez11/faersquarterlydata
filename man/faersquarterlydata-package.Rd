@@ -11,5 +11,10 @@ An easy framework to read FAERS XML/ASCII files \url{https://www.fda.gov/drugs/q
 \author{
 \strong{Maintainer}: Luis Garcez \email{luisgarcez1@gmail.com} (\href{https://orcid.org/0000-0002-8637-7946}{ORCID}) [copyright holder]
 
+Authors:
+\itemize{
+  \item Luisa Prada
+}
+
 }
 \keyword{internal}
