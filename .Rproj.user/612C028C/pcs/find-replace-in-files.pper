@@ -1,15 +1,18 @@
 {
     "dialog-state": {
-        "query": "pivot_wider",
+        "query": "example",
         "path": "",
         "regex": false,
         "caseSensitive": false,
         "wholeWord": false,
-        "filePatterns": [],
+        "filePatterns": [
+            "*.r",
+            "*.R"
+        ],
         "useGitGrep": true,
         "excludeGitIgnore": true,
         "excludeFilePatterns": [],
-        "resultsCount": 8,
+        "resultsCount": 17,
         "errorCount": 0,
         "replaceErrors": "",
         "projectRelative": true

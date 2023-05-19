@@ -4,7 +4,7 @@
 \alias{estimate_prr}
 \title{Estimate Proportional Reporting Odds Ratio}
 \usage{
-estimate_prr(n11, n10, n01, n00)
+estimate_prr(n11, n10, n01, n00, ic_range = 0.95)
 }
 \arguments{
 \item{n11}{Number of events of interest within the group of interest}
@@ -14,6 +14,8 @@ estimate_prr(n11, n10, n01, n00)
 \item{n01}{Number of all events within the group of interest}
 
 \item{n00}{Number of all events from all groups}
+
+\item{ic_range}{Confidence Interval range}
 }
 \value{
 Proportional Reporting Odds Ratio

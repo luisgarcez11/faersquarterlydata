@@ -11,14 +11,13 @@ Authors@R: c(person(given = "Luis",
     family = "Prada", 
     role = c("aut")))
 Maintainer: Luis Garcez <luisgarcez1@gmail.com>
-Description: An easy framework to read FAERS XML/ASCII files <https://www.fda.gov/drugs/questions-and-answers-fdas-adverse-event-reporting-system-faers/fda-adverse-event-reporting-system-faers-latest-quarterly-data-files>.
+Description: An easy framework to read FDA Adverse Event Reporting System XML/ASCII files <https://www.fda.gov/drugs/questions-and-answers-fdas-adverse-event-reporting-system-faers/fda-adverse-event-reporting-system-faers-latest-quarterly-data-files>.
 License: GPL (>= 3)
 Imports: 
     data.table,
     tibble,
     xml2,
     tableone,
-    magrittr,
     tidyr,
     dplyr,
     stringr,

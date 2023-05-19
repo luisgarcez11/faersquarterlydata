@@ -3,7 +3,7 @@
 \docType{data}
 \name{products_fda}
 \alias{products_fda}
-\title{List of approved prodcuts by FDA}
+\title{List of approved products by FDA}
 \format{
 A data frame.
 }
@@ -14,6 +14,6 @@ A data frame.
 products_fda
 }
 \description{
-List of approved prodcuts by FDA
+List of approved products by FDA
 }
 \keyword{datasets}

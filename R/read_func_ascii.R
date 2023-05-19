@@ -330,9 +330,10 @@ unify_tabular_ascii <- function(ascii_list) {
 
   unified_faers <- ascii_list$reaction %>%
     left_join(ascii_list$demographics, by = c("primaryid", "caseid")) %>%
-    mutate(patient_drug = lapply(primaryid, FUN = function(x) {
+    mutate(patient_drug = lapply(as.integer(primaryid), FUN = function(x) {
       drug_indi_info %>%
         filter(primaryid == x) %>%
+        mutate_at(c("prod_ai", "drugname", "indi_pt"), ~stringr::str_squish(.)) %>% 
         suppressMessages()
     })) %>%
     left_join(outcome_info, by = c("primaryid", "caseid")) %>%
@@ -359,7 +360,8 @@ unify_tabular_ascii <- function(ascii_list) {
 
   #de-duplication
   unified_faers <- unified_faers %>% 
-    distinct(reporter_country, sex, event_dt, age, pt, indi_pt_all, drugname_all, start_dt_ps, .keep_all = TRUE)
+    distinct(reporter_country, sex, event_dt, age, pt, indi_pt_all, drugname_all, start_dt_ps, .keep_all = TRUE) %>% 
+    mutate_at("pt", ~stringr::str_squish(.)) #trim
   message("unification and de-duplication applied.")
   
   return(unified_faers)

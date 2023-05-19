@@ -11,6 +11,7 @@ summary_faersdata <- function(tabular_faers_data){
   tabular_faers_data_summary <- list()
   
   #ADR for each year summary
+  message("summarizing event dates")
   is.date <- function(x) inherits(x, 'Date')
   for (date_var in names(tabular_faers_data)){
     
@@ -26,6 +27,7 @@ summary_faersdata <- function(tabular_faers_data){
   }
   
   #by reaction
+  message("summarizing ADR")
   tabular_faers_data_summary$reaction <- 
     tabular_faers_data %>%
     mutate_at("pt", ~stringr::str_squish(.)) %>% 
@@ -41,8 +43,10 @@ summary_faersdata <- function(tabular_faers_data){
     arrange(desc(n_ADR)) 
 
   #by drugname
+  message("summarizing drugname")
   drugname_v <- tibble()
-  for (drug_element in tabular_faers_data$patient_drug){
+  for (drug_element in dplyr::distinct(tabular_faers_data, primaryid, 
+                                       .keep_all = TRUE)$patient_drug){
     
     drug <- drug_element[,c("drugname", "role_cod")] %>%
       tidyr::separate_longer_delim(drugname, delim = "\\") %>% 
@@ -59,28 +63,10 @@ summary_faersdata <- function(tabular_faers_data){
   
   
   #by indication
-  message("summarizing drugname")
+  message("summarizing indication")
   indication_v <- tibble()
-  for (drug_element in tabular_faers_data$patient_drug){
-    
-    indi <- drug_element[,c("indi_pt", "role_cod")] %>%
-      tidyr::separate_longer_delim(indi_pt, delim = "\\") %>% 
-      mutate_at("indi_pt", ~stringr::str_squish(.)) 
-    
-    indication_v <- bind_rows(indication_v, indi)
-  }
-  tabular_faers_data_summary$drugname <- indication_v %>% 
-    group_by(indi_pt, role_cod) %>% 
-    summarize( n = n(), .groups = "keep") %>% 
-    ungroup() %>% 
-    tidyr::pivot_wider(names_from = role_cod, values_from = n, names_prefix = "n_") %>% 
-    arrange(desc(.[,2]))
-  
-  
-  #by indication
-  message("summarizing drug name")
-  indication_v <- tibble()
-  for (drug_element in tabular_faers_data$patient_drug){
+  for (drug_element in dplyr::distinct(tabular_faers_data, primaryid, 
+                                       .keep_all = TRUE)$patient_drug){
     
     indi <- drug_element[,c("indi_pt", "role_cod")] %>%
       tidyr::separate_longer_delim(indi_pt, delim = "\\") %>% 
@@ -99,7 +85,8 @@ summary_faersdata <- function(tabular_faers_data){
   #by active ingredient
   message("summarizing active ingredient")
   prod_ai_v <- tibble()
-  for (drug_element in tabular_faers_data$patient_drug){
+  for (drug_element in dplyr::distinct(tabular_faers_data, primaryid, 
+                                .keep_all = TRUE)$patient_drug) {
     
     ai <- drug_element[,c("prod_ai", "role_cod")] %>%
       tidyr::separate_longer_delim(prod_ai, delim = "\\") %>% 
@@ -116,6 +103,7 @@ summary_faersdata <- function(tabular_faers_data){
   
   
   #by safetyreportid
+  message("summarizing by safetyreportid")
   tabular_faers_data_summary$safetyreporid <- 
     tabular_faers_data %>% 
     mutate(age_YR = case_when(age_cod == "YR" ~ as.numeric(age),

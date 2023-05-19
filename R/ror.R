@@ -41,6 +41,7 @@ estimate_ror <- function(n11, n10, n01, n00, ic_range = 0.95){
 #' @param n01 Number of all events within the group of interest
 #' @param n00 Number of all events from all groups
 #' @param n00 Number of all events from all groups
+#' @param ic_range Confidence Interval range
 #'
 #' @return Proportional Reporting Odds Ratio
 #' @export
@@ -48,14 +49,19 @@ estimate_ror <- function(n11, n10, n01, n00, ic_range = 0.95){
 #'
 #' @examples
 #' estimate_prr(n11 = 20, n10 = 10, n01 = 200, n00 = 200)
-estimate_prr <- function(n11, n10, n01, n00){
+estimate_prr <- function(n11, n10, n01, n00, ic_range = 0.95){
   
   n11 <- as.numeric(n11)
   n10 <- as.numeric(n10)
   n01 <- as.numeric(n01)
   n00 <- as.numeric(n00)
   
-  prr <- (n11/(n11 + n01)) / (n10/ (n10 + n00))
+  prr <- list()
+  ic_range <- stats::qnorm(ic_range + (1-ic_range)/2) * sqrt(1/n11 + 1/(n11 + n01) + 1/n10 + 1/(n10 + n00))
+  
+  prr$estimate <- (n11/(n11 + n01)) / (n10/ (n10 + n00))
+  prr$ic <- c(lower = round(exp( log(prr$estimate) - ic_range ), 2),
+              upper = round(exp( log(prr$estimate) + ic_range), 2)) 
   
   return(prr)
   
@@ -84,14 +90,11 @@ estimate_chisq <- function(n11, n10, n01, n00){
   n01 <- as.numeric(n01)
   n00 <- as.numeric(n00)
   
-  chisq <- list()
-  
   mx <- matrix(data = c(n11, n10, n01, n00), ncol = 2, byrow = TRUE)
   
   ch <- chisq.test(mx, correct = TRUE) %>% suppressWarnings()
   
-  chisq$estimate <- unname(ch$statistic)
-  chisq$p_value <- ch$p.value
+  chisq <- unname(ch$statistic)
   
   return(chisq)
   
@@ -131,7 +134,7 @@ estimate_infoc <- function(n11, n10, n01, n00){
 }
 
 
-#' Estimate Reporting Odds Ratio 
+#' Estimate Measures of Association
 #'
 #' @param tabular_faers_data FAERS tabular format. Output of function \link{retrieve_faersxml} or \link{retrieve_faersxml_all}
 #' @param group_of_interest_col  a string, specifying the group of interest. 
@@ -141,12 +144,12 @@ estimate_infoc <- function(n11, n10, n01, n00){
 #' @param event_of_interest_col a string, specifying the event of interest. Must me a column name of `tabular_faers_data`.
 #' @param ... arguments passed to `estimate_ror` like `ic_range`.
 #'
-#' @return tibble with the event of interest counts, group of interest counts and the respective estimated RORand Confidence Intervals.
+#' @return tibble with the event of interest counts, group of interest counts and the respective estimated measures of association.
 #' @export
 #' @import dplyr
 #'
 #' @examples 
-#' estimate_ror_bygroup(tabular_faers_data = tabular_faersdata_example ,
+#' estimate_ror_bygroup(tabular_faers_data = dplyr::filter(unified_als_data, sex %in% c("M", "F")),
 #' group_of_interest_col = "sex", 
 #' group_of_interest_ref = "M", 
 #' event_of_interest_col = "pt") 
@@ -186,7 +189,7 @@ estimate_ror_bygroup <- function(tabular_faers_data,
       mutate(prr = apply(., MARGIN = 1, FUN = function(x) { estimate_prr(n11 = x[2], n10 = x[3], n01 = x[5], n00 = x[6])})) %>% 
       mutate(infoc = apply(., MARGIN = 1, FUN = function(x) { estimate_infoc(n11 = x[2], n10 = x[3], n01 = x[5], n00 = x[6])})) %>% 
       mutate(chisq = apply(., MARGIN = 1, FUN = function(x) { estimate_chisq(n11 = x[2], n10 = x[3], n01 = x[5], n00 = x[6])})) %>% 
-      tidyr::unnest_wider(c("ror", "infoc", "chisq"), names_sep = "_") %>% 
+      tidyr::unnest_wider(c("ror", "prr", "infoc"), names_sep = "_") %>% 
       tidyr::unnest_wider(ends_with("ic") , names_sep = "_") %>% 
       filter(.[,1] == TRUE) %>% 
       select(-1) %>% 
@@ -216,7 +219,7 @@ estimate_ror_bygroup <- function(tabular_faers_data,
       mutate(prr = apply(., MARGIN = 1, FUN = function(x) { estimate_prr(n11 = x[2], n10 = x[3], n01 = x[5], n00 = x[6])})) %>% 
       mutate(infoc = apply(., MARGIN = 1, FUN = function(x) { estimate_infoc(n11 = x[2], n10 = x[3], n01 = x[5], n00 = x[6])})) %>% 
       mutate(chisq = apply(., MARGIN = 1, FUN = function(x) { estimate_chisq(n11 = x[2], n10 = x[3], n01 = x[5], n00 = x[6])})) %>% 
-      tidyr::unnest_wider(c("ror", "infoc", "chisq"), names_sep = "_") %>% 
+      tidyr::unnest_wider(c("ror", "prr", "infoc"), names_sep = "_") %>% 
       tidyr::unnest_wider(ends_with("ic") , names_sep = "_") %>% 
       arrange(desc("total_events")) %>% 
       return()

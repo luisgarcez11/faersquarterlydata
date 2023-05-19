@@ -1,9 +1,9 @@
 {
-    "path": "C:/Users/luis.ferreira/Desktop/faersquarterlydata/tests/testthat",
+    "path": "C:/Users/luis.ferreira/Desktop/faersquarterlydata/data",
     "sortOrder": [
         {
             "columnIndex": 2,
-            "ascending": true
+            "ascending": false
         },
         {
             "columnIndex": 4,
