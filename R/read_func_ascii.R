@@ -72,6 +72,12 @@ arrange_date <- function(date_string) {
 #' @export
 retrieve_faersascii <- function(ascii_dir, cache_path = NULL, drug_indication_pattern = NULL, drug_pattern = NULL,
                                  primary_suspect = TRUE, ...) {
+  
+  #setting global vars
+  caseid <- role_cod <- drugname <- indi_pt <- primaryid <- indi_drug_seq <- 
+    ichicsr <- . <- NULL
+  
+  
   if (!dir.exists(ascii_dir)) {
     stop("directory does not exist")
   }
@@ -303,6 +309,13 @@ retrieve_faersascii <- function(ascii_dir, cache_path = NULL, drug_indication_pa
 #' @return A data frame representing FAERS data, with all components from the list joined.
 #' @export
 unify_tabular_ascii <- function(ascii_list) {
+  
+  #setting global vars
+  primaryid <- caseid <- indi_drug_seq <- indi_pt <- dsg_drug_seq <- drugname <- 
+    role_cod <- start_dt <- reporter_country <- sex <- event_dt <- age <- 
+    indi_pt_all <- drugname_all <- start_dt_ps <- NULL
+  
+  
   drug_indi_info <- ascii_list$drug %>%
     mutate_at("drugname", ~stringr::str_squish(.)) %>% 
     left_join(ascii_list$indication %>% group_by(primaryid, caseid, indi_drug_seq) %>%

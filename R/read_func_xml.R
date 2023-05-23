@@ -26,6 +26,10 @@ faersxml_to_r <- function(xml_address) {
 #' @export
 #'
 retrieve_faersxml <- function(xml_address, reaction_wise = TRUE, drug_wise = FALSE, drug_indication_pattern = NULL) {
+  
+  #setting global variables
+  ichicsr <- . <- NULL
+  
   message(paste("retrieving", xml_address))
 
 

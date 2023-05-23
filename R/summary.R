@@ -7,6 +7,9 @@
 #' @export
 summary_faersdata <- function(tabular_faers_data){
   
+  primaryid <- drugname <- . <- role_cod <- indi_pt <- prod_ai <- mfr_sndr <- age_YR <- 
+    sex <- wt <- reporter_country <- occr_country <- NULL
+  
   
   tabular_faers_data_summary <- list()
   
@@ -19,7 +22,7 @@ summary_faersdata <- function(tabular_faers_data){
       tabular_faers_data_summary[[date_var]] <- 
         tabular_faers_data %>% 
         mutate_at(date_var, ~ format.Date(., "%Y")) %>% 
-        group_by_at(vars(date_var)) %>% 
+        group_by_at(all_of(date_var)) %>% 
         summarize(n_ADR = n(),
                   n_safetyreport = length(unique(primaryid))) %>% 
         ungroup()
@@ -37,15 +40,15 @@ summary_faersdata <- function(tabular_faers_data){
                            TRUE ~ as.numeric(age))) %>% 
     group_by(pt) %>% 
     summarize(n_ADR = n(),
-              age_mean = round(mean(as.numeric(age_YR), na.rm = TRUE)),
-              weight_mean = round(mean(as.numeric(wt), na.rm = TRUE))) %>% 
+              age_mean = round(mean(as.numeric(eval(parse(text = "age_YR"))), na.rm = TRUE)),
+              weight_mean = round(mean(as.numeric(eval(parse(text = "wt"))), na.rm = TRUE))) %>% 
     ungroup() %>% 
-    arrange(desc(n_ADR)) 
+    arrange(desc("n_ADR")) 
 
   #by drugname
   message("summarizing drugname")
   drugname_v <- tibble()
-  for (drug_element in dplyr::distinct(tabular_faers_data, primaryid, 
+  for (drug_element in dplyr::distinct(tabular_faers_data, tabular_faers_data[["primaryid"]], 
                                        .keep_all = TRUE)$patient_drug){
     
     drug <- drug_element[,c("drugname", "role_cod")] %>%
@@ -55,7 +58,7 @@ summary_faersdata <- function(tabular_faers_data){
     drugname_v <- bind_rows(drugname_v, drug)
   }
   tabular_faers_data_summary$drug_name_ps <- drugname_v %>% 
-    group_by(drugname, role_cod) %>% 
+    group_by(.[c("drugname", "role_cod")]) %>% 
     summarize( n = n(), .groups = "keep") %>% 
     ungroup() %>% 
     tidyr::pivot_wider(names_from = role_cod, values_from = n, names_prefix = "n_") %>% 
@@ -65,7 +68,7 @@ summary_faersdata <- function(tabular_faers_data){
   #by indication
   message("summarizing indication")
   indication_v <- tibble()
-  for (drug_element in dplyr::distinct(tabular_faers_data, primaryid, 
+  for (drug_element in dplyr::distinct(tabular_faers_data, tabular_faers_data[["primaryid"]], 
                                        .keep_all = TRUE)$patient_drug){
     
     indi <- drug_element[,c("indi_pt", "role_cod")] %>%
@@ -85,7 +88,7 @@ summary_faersdata <- function(tabular_faers_data){
   #by active ingredient
   message("summarizing active ingredient")
   prod_ai_v <- tibble()
-  for (drug_element in dplyr::distinct(tabular_faers_data, primaryid, 
+  for (drug_element in dplyr::distinct(tabular_faers_data, tabular_faers_data[["primaryid"]], 
                                 .keep_all = TRUE)$patient_drug) {
     
     ai <- drug_element[,c("prod_ai", "role_cod")] %>%
@@ -110,6 +113,7 @@ summary_faersdata <- function(tabular_faers_data){
                            age_cod == "MON" ~ as.numeric(age)/30,
                            age_cod == "DY" ~ as.numeric(age)*365,
                            TRUE ~ as.numeric(age))) %>% 
+    mutate_at("primaryid", ~as.integer(.)) %>% 
     group_by(primaryid) %>% 
     summarize(mfr_sndr = unique(mfr_sndr),
               age_YR = as.numeric(unique(age_YR)),
