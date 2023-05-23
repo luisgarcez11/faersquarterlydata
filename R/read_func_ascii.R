@@ -326,7 +326,6 @@ unify_tabular_ascii <- function(ascii_list) {
               by = c("primaryid", "caseid", "drug_seq" = "dsg_drug_seq"))
 
   outcome_info <- ascii_list$outcome %>%
-    group_by(primaryid, caseid) %>%
     tidyr::pivot_wider(
       id_cols = c("primaryid", "caseid"), names_from = "outc_code",
       values_fill = "0", values_from = "outc_code", values_fn = ~ ifelse(. == "0", "0", "1"),
@@ -334,7 +333,6 @@ unify_tabular_ascii <- function(ascii_list) {
     )
 
   report_source_info <- ascii_list$report_source %>%
-    group_by(primaryid, caseid) %>%
     tidyr::pivot_wider(
       id_cols = c("primaryid", "caseid"), names_from = "rpsr_cod",
       values_fill = "0", values_from = "rpsr_cod", values_fn = ~ ifelse(. == "0", "0", "1"),
@@ -342,7 +340,8 @@ unify_tabular_ascii <- function(ascii_list) {
     )
 
   unified_faers <- ascii_list$reaction %>%
-    left_join(ascii_list$demographics, by = c("primaryid", "caseid")) %>%
+    left_join(distinct(ascii_list$demographics, primaryid, .keep_all = TRUE), 
+              by = c("primaryid", "caseid")) %>%
     mutate(patient_drug = lapply(as.integer(primaryid), FUN = function(x) {
       drug_indi_info %>%
         filter(primaryid == x) %>%
