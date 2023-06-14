@@ -1,6 +1,6 @@
 {
     "dialog-state": {
-        "query": "example",
+        "query": "age_YR",
         "path": "",
         "regex": false,
         "caseSensitive": false,
@@ -12,7 +12,7 @@
         "useGitGrep": true,
         "excludeGitIgnore": true,
         "excludeFilePatterns": [],
-        "resultsCount": 17,
+        "resultsCount": 6,
         "errorCount": 0,
         "replaceErrors": "",
         "projectRelative": true
