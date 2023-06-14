@@ -407,8 +407,36 @@ unify_tabular_ascii <- function(ascii_list) {
 
   #de-duplication
   unified_faers <- unified_faers %>% 
-    distinct(reporter_country, sex, event_dt, age, pt, indi_pt_all, drugname_all, start_dt_ps, .keep_all = TRUE) %>% 
-    mutate_at("pt", ~stringr::str_squish(.)) #trim
+    mutate_at("pt", ~stringr::str_squish(.))
+  
+  #latest case version
+  unified_faers <- unified_faers %>% 
+    group_by(caseid) %>% 
+    filter(caseversion == max(caseversion)) %>% 
+    ungroup()
+  
+  #remove suspected duplicated cases
+  index_to_remove <- which(duplicated(unified_faers [,c( "reporter_country",
+                                                          "sex", "event_dt",
+                                                          "age", "pt",
+                                                          "indi_pt_all", 
+                                                          "drugname_all", 
+                                                          "start_dt_ps")]) &
+                              !is.na(unified_faers$reporter_country) &
+                              !is.na(unified_faers$sex) &
+                              !is.na(unified_faers$event_dt) &
+                              !is.na(unified_faers$age) &
+                              !is.na(unified_faers$pt) &
+                              !is.na(unified_faers$indi_pt_all) &
+                              !is.na(unified_faers$drugname_all) &
+                              !is.na(unified_faers$start_dt_ps)
+  )
+  
+  if(length(index_to_remove) >=1){unified_faers <- unified_faers[-index_to_remove,]}
+  
+  
+  
+  #trim
   message("unification and de-duplication applied.")
   
   return(unified_faers)
