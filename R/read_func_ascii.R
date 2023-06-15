@@ -337,11 +337,11 @@ retrieve_faersascii <- function(ascii_dir, cache_path = NULL, drug_indication_pa
 #' @export
 unify_tabular_ascii <- function(ascii_list) {
   
+  
   #setting global vars
   primaryid <- caseid <- indi_drug_seq <- indi_pt <- dsg_drug_seq <- drugname <- 
     role_cod <- start_dt <- reporter_country <- sex <- event_dt <- age <- age_YR <- 
     indi_pt_all <- drugname_all <- start_dt_ps <- caseversion <- NULL
-  
   
   drug_indi_info <- ascii_list$drug %>%
     mutate_at("drugname", ~stringr::str_squish(.)) %>% 
@@ -365,16 +365,16 @@ unify_tabular_ascii <- function(ascii_list) {
       values_fill = "0", values_from = "rpsr_cod", values_fn = ~ ifelse(. == "0", "0", "1"),
       names_prefix = "report_source_"
     )
-
+  
   unified_faers <- ascii_list$reaction %>%
-    left_join(distinct(ascii_list$demographics, primaryid, .keep_all = TRUE), 
+    left_join(distinct(ascii_list$demographics, primaryid, caseid, .keep_all = TRUE), 
               by = c("primaryid", "caseid")) %>%
     mutate(patient_drug = lapply(as.integer(primaryid), FUN = function(x) {
       drug_indi_info %>%
         filter(primaryid == x) %>%
         mutate_at(c("prod_ai", "drugname", "indi_pt"), ~stringr::str_squish(.)) %>% 
         suppressMessages()
-    })) %>%
+    })) %>% 
     left_join(outcome_info, by = c("primaryid", "caseid")) %>%
     left_join(report_source_info, by = c("primaryid", "caseid")) %>%
     left_join(drug_indi_info %>%
@@ -394,7 +394,7 @@ unify_tabular_ascii <- function(ascii_list) {
         start_dt_ps = unique(start_dt),
         .groups = "keep"
       ) %>%
-      ungroup() %>% suppressWarnings(), by = c("primaryid", "caseid")) %>% 
+      ungroup() %>% suppressWarnings(), by = c("primaryid", "caseid"))  %>% 
     mutate(age_YR = case_when(age_cod == "YR" ~ as.numeric(age),
                               age_cod == "DEC" ~ as.numeric(age)*10,
                               age_cod == "MON" ~ as.numeric(age)/30,
@@ -404,23 +404,23 @@ unify_tabular_ascii <- function(ascii_list) {
                               TRUE ~ as.numeric(age))) %>% 
     relocate(age_YR, .after = "age")
 
-
+  
   #de-duplication
   unified_faers <- unified_faers %>% 
     mutate_at("pt", ~stringr::str_squish(.))
   
   #latest case version
-  unified_faers <- unified_faers %>% 
-    group_by(caseid) %>% 
-    filter(caseversion == max(caseversion)) %>% 
+  unified_faers <- unified_faers %>%
+    group_by(caseid) %>%
+    filter(caseversion == max(caseversion)) %>%
     ungroup()
-  
-  #remove suspected duplicated cases
+  # 
+  # #remove suspected duplicated cases
   index_to_remove <- which(duplicated(unified_faers [,c( "reporter_country",
                                                           "sex", "event_dt",
                                                           "age", "pt",
-                                                          "indi_pt_all", 
-                                                          "drugname_all", 
+                                                          "indi_pt_all",
+                                                          "drugname_all",
                                                           "start_dt_ps")]) &
                               !is.na(unified_faers$reporter_country) &
                               !is.na(unified_faers$sex) &
@@ -431,11 +431,10 @@ unify_tabular_ascii <- function(ascii_list) {
                               !is.na(unified_faers$drugname_all) &
                               !is.na(unified_faers$start_dt_ps)
   )
-  
+
   if(length(index_to_remove) >=1){unified_faers <- unified_faers[-index_to_remove,]}
-  
-  
-  
+
+
   #trim
   message("unification and de-duplication applied.")
   
