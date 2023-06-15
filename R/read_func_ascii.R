@@ -340,7 +340,7 @@ unify_tabular_ascii <- function(ascii_list) {
   #setting global vars
   primaryid <- caseid <- indi_drug_seq <- indi_pt <- dsg_drug_seq <- drugname <- 
     role_cod <- start_dt <- reporter_country <- sex <- event_dt <- age <- age_YR <- 
-    indi_pt_all <- drugname_all <- start_dt_ps <- NULL
+    indi_pt_all <- drugname_all <- start_dt_ps <- caseversion <- NULL
   
   
   drug_indi_info <- ascii_list$drug %>%
