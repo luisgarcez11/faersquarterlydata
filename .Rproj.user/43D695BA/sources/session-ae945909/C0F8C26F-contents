@@ -1,0 +1,23 @@
+library(faersquarterlydata)
+library(dplyr)
+
+
+estimate_ror_bygroup(als_faers_data_unified %>% filter(!is.na(age)) %>% mutate(age_r = case_when(age >= 65 ~ ">=65",age < 65 ~ "<65")) %>% 
+                       filter(age_r %in% c(">=65", "<65")), 
+                              group_of_interest_col = "age_r", 
+                              group_of_interest_ref = ">=65", 
+                              event_of_interest_col = "pt")
+                     
+
+estimate_ror_bygroup(als_faers_data_unified  %>% filter(sex %in% c("F", "M")), 
+                     group_of_interest_col = "sex", 
+                     group_of_interest_ref = "M", 
+                     event_of_interest_col = "pt")
+
+estimate_ror_bygroup(als_faers_data_unified %>% 
+                       filter(!is.na(event_dt)) %>%
+                       mutate(event_dt_r = case_when(event_dt >= as.Date("2020-01-01") ~ ">=2020",
+                                                     event_dt < as.Date("2020-01-01") ~ "<2020")), 
+                     group_of_interest_col = "event_dt_r", 
+                     group_of_interest_ref = ">=2020", event_of_interest_col = "pt")
+                     
