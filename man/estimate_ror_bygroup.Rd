@@ -2,7 +2,7 @@
 % Please edit documentation in R/ror.R
 \name{estimate_ror_bygroup}
 \alias{estimate_ror_bygroup}
-\title{Estimate Reporting Odds Ratio}
+\title{Estimate Measures of Association}
 \usage{
 estimate_ror_bygroup(
   tabular_faers_data,
@@ -25,16 +25,18 @@ Must me a column name of `tabular_faers_data`, and this columns should only cont
 
 \item{event_of_interest_col}{a string, specifying the event of interest. Must me a column name of `tabular_faers_data`.}
 
-\item{...}{arguments passed to `estimate_ror`.}
+\item{...}{arguments passed to `estimate_ror` like `ic_range`.}
 }
 \value{
-tibble with the event of interest counts, group of interest counts and the respective estimated RORand Confidence Intervals.
+tibble with the event of interest counts, group of interest counts and the respective estimated measures of association 
+(ROR and its IC, PRR and its IC, Information Component and Chi-squared statisti with Yates correction.
 }
 \description{
-Estimate Reporting Odds Ratio
+Estimate Measures of Association
 }
 \examples{
-estimate_ror_bygroup(tabular_faers_data = tabular_faersdata_example ,
+estimate_ror_bygroup(tabular_faers_data = dplyr::filter(als_faers_data_unified, 
+sex \%in\% c("M", "F")),
 group_of_interest_col = "sex", 
 group_of_interest_ref = "M", 
 event_of_interest_col = "pt") 

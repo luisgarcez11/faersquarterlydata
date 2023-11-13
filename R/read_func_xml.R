@@ -5,7 +5,7 @@
 #' @return a list containing all the elements from `xml_address`
 #' @export
 faersxml_to_r <- function(xml_address) {
-  if (!stringr::str_detect(xml_address, pattern = ".xml")) {
+  if (!stringr::str_detect(xml_address, pattern = "\\.xml")) {
     stop("xml address should have an .xml extension")
   }
 
@@ -26,6 +26,10 @@ faersxml_to_r <- function(xml_address) {
 #' @export
 #'
 retrieve_faersxml <- function(xml_address, reaction_wise = TRUE, drug_wise = FALSE, drug_indication_pattern = NULL) {
+  
+  #setting global variables
+  ichicsr <- . <- NULL
+  
   message(paste("retrieving", xml_address))
 
 
@@ -50,9 +54,6 @@ retrieve_faersxml <- function(xml_address, reaction_wise = TRUE, drug_wise = FAL
   # tidyr::unnest more columns
   xml_df4 <- tibble()
   for (i in 1:nrow(xml_df3)) {
-    if (i %% 50000 == 0) {
-      message(paste("processed", i, "safetyreports out of", nrow(xml_df3), "from", xml_address))
-    }
 
     d <- xml_df3 %>%
       slice(i)

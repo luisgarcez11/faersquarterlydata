@@ -9,7 +9,8 @@ retrieve_faersascii(
   cache_path = NULL,
   drug_indication_pattern = NULL,
   drug_pattern = NULL,
-  primary_suspect = TRUE
+  primary_suspect = TRUE,
+  ...
 )
 }
 \arguments{
@@ -17,15 +18,17 @@ retrieve_faersascii(
 
 \item{cache_path}{(optional) a string. Must have a ".Rdata" extension to save the read tabular formats in each loop.}
 
-\item{drug_indication_pattern}{(optional) a string.}
+\item{drug_indication_pattern}{(optional) a string.filter ADRs with a specific drug indication pattern (**stringr** sintax)}
 
-\item{drug_pattern}{(optional) a string.}
+\item{drug_pattern}{(optional) a string. filter ADRs with a specific drug name pattern (**stringr** sintax)}
 
 \item{primary_suspect}{(optional) a string.}
+
+\item{...}{directory with duplicate information to be passed to \link{get_duplicate_caseids}}
 }
 \value{
 A list with binded tibbles retrieved from files.
 }
 \description{
-Read FAERS ascii files
+Read ASCII files from a directory, removing the duplicates.
 }

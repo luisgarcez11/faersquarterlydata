@@ -1,15 +1,18 @@
 {
     "dialog-state": {
-        "query": "retrieve_faersascii",
+        "query": "als_faers_data",
         "path": "",
         "regex": false,
         "caseSensitive": false,
         "wholeWord": false,
-        "filePatterns": [],
-        "useGitGrep": false,
+        "filePatterns": [
+            "*.r",
+            "*.R"
+        ],
+        "useGitGrep": true,
         "excludeGitIgnore": true,
         "excludeFilePatterns": [],
-        "resultsCount": 17,
+        "resultsCount": 3,
         "errorCount": 0,
         "replaceErrors": "",
         "projectRelative": true

@@ -3,14 +3,14 @@
     "sortOrder": [
         {
             "columnIndex": 2,
-            "ascending": true
-        },
-        {
-            "columnIndex": 3,
             "ascending": false
         },
         {
             "columnIndex": 4,
+            "ascending": false
+        },
+        {
+            "columnIndex": 3,
             "ascending": false
         }
     ]
