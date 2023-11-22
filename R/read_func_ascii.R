@@ -332,6 +332,9 @@ retrieve_faersascii <- function(ascii_dir, cache_path = NULL, drug_indication_pa
 #' Turn the list elements returned from \link{retrieve_faersascii} into a tabular format
 #'
 #' @param ascii_list list from \link{retrieve_faersascii}
+#' @examples
+#' unify_tabular_ascii(ascii_list = als_faers_data)
+#' 
 #'
 #' @return A data frame representing FAERS data, with all components from the list joined.
 #' @export
